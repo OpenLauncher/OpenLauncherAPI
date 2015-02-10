@@ -1,0 +1,122 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven {
+            name = "Forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+        maven {
+            name = "Sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.0.3'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT' // Contains less derpy launch4j plugin
+        classpath 'edu.sc.seis.gradle:macappbundle:2.0.0'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'macAppBundle'
+apply plugin: 'maven-publish'
+
+repositories {
+	mavenCentral()
+}
+
+processResources{
+    def ENV = System.getenv()
+    if (ENV.BUILD_NUMBER) {
+        filter(ReplaceTokens, tokens:['@BUILD@': '${System.getenv().BUILD_NUMBER}'])
+    }
+}
+
+ext.configFile = file 'src/main/resources/build.properties'
+
+configFile.withReader {
+    def prop = new Properties()
+    prop.load(it)
+    project.ext.config = new ConfigSlurper().parse prop
+}
+
+mainClassName = config.mainClass
+def ENV = System.getenv()
+if (ENV.BUILD_NUMBER) {
+	version = "${config.version.reserved}.${config.version.major}.${config.version.minor}." + "${System.getenv().BUILD_NUMBER}"
+} else {
+	version = "${config.version.reserved}.${config.version.major}.${config.version.minor}.0"
+}
+
+group = 'com.atlauncher'
+archivesBaseName = 'OpenLauncher'
+sourceCompatibility = '1.6' // tergetCompatibility set by this automatically
+
+jar {
+    manifest {
+        attributes "Implementation-Version": version
+        attributes "Build-Jdk": org.gradle.internal.jvm.Jvm.current()
+        //attributes "Class-Path": configurations.compile.collect { it.getName() }.join(' ')
+        attributes "Built-By": System.getProperty("user.name")
+        attributes "Implementation-Vender": "Modmuss50"
+        attributes "Created-By": "Gradle " + project.getGradle().getGradleVersion()
+    }
+	appendix = 'jar'
+}
+
+task copyToOutput(type: Copy) {
+    from("${buildDir}/libs/")
+    destinationDir = file("${buildDir}/distributions")
+}
+build.finalizedBy(copyToOutput)
+
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "file:///var/www/maven/")
+            pom {
+                groupId = "OpenLauncherAPI"
+                version = project.version
+                artifactId = project.archivesBaseName
+                project {
+                    name project.archivesBaseName
+                    packaging 'jar'
+                    description 'OpenLauncher'
+                    url 'https://github.com/OpenLauncher/OpenLauncherAPI'
+                    scm {
+                        url 'https://github.com/OpenLauncher/OpenLauncherAPI'
+                        connection 'scm:git:git@github.com:OpenLauncher/OpenLauncherAPI.git'
+                        developerConnection 'scm:git:git@github.com:OpenLauncher/OpenLauncherAPI.git'
+                    }
+                    issueManagement {
+                        system 'github'
+                        url 'https://github.com/OpenLauncher/OpenLauncherAPI/issues'
+                    }
+                    licenses {
+                        license {
+                            name 'License'
+                            url 'https://github.com/OpenLauncher/OpenLauncherAPI/blob/master/LICENSE'
+                            distribution 'repo'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id 'modmuss50'
+                            name 'modmuss50'
+                            roles { role 'developer' }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
