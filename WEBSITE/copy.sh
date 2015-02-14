@@ -1,5 +1,4 @@
-cp -r /Users/mark/PhpstormProjects/PhpPlayGround /Applications/MAMP/htdocs
-cp -r /Users/mark/PhpstormProjects/PhpPlayGround/ /Users/mark/Documents/GitHub/OpenLauncherPanel
+cp -r /Users/mark/Documents/GitHub/OpenLauncherAPI/WEBSITE/ /Applications/MAMP/htdocs
 
 
 

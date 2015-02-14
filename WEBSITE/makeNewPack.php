@@ -23,26 +23,8 @@ if($hasFailed){
     die($error);
 }
 
+$command = escapeshellcmd("python makePack.py ". $_POST['name'] . " " . $_SESSION['username'] . " ".  str_replace(" ","_",$_POST['description']) . " " . $_POST['mcVer'] . " " . $_POST['forgeVer']);
+$output = shell_exec($command);
+echo $output;
 
-$structure = 'packs/' . $_POST["name"] . '/';
-print($structure);
-if (!mkdir($structure, 0777, true)) {
-    die('Failed to create folders...');
-    $hasFailed = true;
-} else {
-    echo 'Created the mod pack folder';
-}
-
-
-if(!$hasFailed) {
-    $file = $structure + 'pack.txt';
-    $newfile = fopen($file, "wb") or die("Unable to make new file!");
-    fclose($newfile);
-    $myfile = fopen($file, "w") or die("Unable to open file!");
-    $txt = $_POST["description"] + "\n";
-    fwrite($myfile, $txt);
-    $txt = $_POST["mcVer"] + "\n";
-    fwrite($myfile, $txt);
-    fclose($myfile);
-}
 ?>

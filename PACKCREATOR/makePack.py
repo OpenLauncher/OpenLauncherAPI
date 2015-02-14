@@ -5,7 +5,7 @@ import os
 
 #(PACKNAME) (PACKMAKER) (PACKDESCRIPTION) (MCVER) (FORGEVER)
 
-print "Starting pack generator"
+print "Starting to generate your mod pack!"
 packName = ""
 packCreator = ""
 packDescription = ""
@@ -41,4 +41,6 @@ file.close()
 
 file = open(filename + "/mods.txt", "w")
 file.close()
+
+print "Mod pack structure created!"
 
